@@ -1,106 +1,101 @@
-# 🦷 Assistant IA Cabinet Dentaire — API FastAPI
+# Assistant IA Cabinet Dentaire — API FastAPI
 
-API avancée pour assister un cabinet dentaire : questions texte, analyse de fichiers (PDF/images), actions configurables via `actions.json`, cache en mémoire, rate limiting par IP, et nettoyage des réponses modèles (suppression `**`, `***`, `##`, `###`, etc.).
+API avancée d’assistance pour cabinet dentaire : questions texte, analyse de fichiers (PDF/images), actions configurables via `actions.json`, cache en mémoire, rate limiting par IP et nettoyage des réponses modèles (suppression des `**`, `***`, `##`, `###`, etc.).
 
 ## ✨ Fonctionnalités
-- **/ask** : requêtes texte avec actions (`default`, `resume`, `dental_diagnosis`, …)
-- **/ask-with-file** : upload + analyse (PDF, images, docs)
-- **Cache** : réponses mises en cache pendant 30 min (clé basée sur `prompt+action+fichier`)
-- **Rate limiting** : 100 requêtes / heure / IP
-- **Sécurité** : HTTP Bearer optionnel (`API_SECRET`), Trusted hosts
-- **CORS** : configurable pour frontends (SPA, desktop, etc.)
-- **Logs** : `dental_assistant.log` + console
-- **Nettoyage Markdown** : supprime `**`, `***`, `##`, `###`, etc. pour des réponses “propres”
+
+* **/ask** : requêtes texte avec actions (`default`, `resume`, `dental_diagnosis`, …)
+* **/ask-with-file** : upload + analyse (PDF, images, docs)
+* **Cache** : réponses mises en cache pendant 30 min (clé = `prompt+action+fichier`)
+* **Rate limiting** : 100 requêtes / heure / IP
+* **Sécurité** : HTTP Bearer optionnel (`API_SECRET`), Trusted hosts
+* **CORS** : configurable (SPA, desktop, etc.)
+* **Logs** : `dental_assistant.log` + console
+* **Nettoyage Markdown** : supprime `**`, `***`, `##`, `###`, etc. pour des réponses “propres”
 
 ---
 
-## 🧱 Architecture rapide
-```
+## 🧱 Architecture
 
+```
 .
-├─ app.py                 # (Ton fichier FastAPI principal)
+├─ MyFastAPI.py           # Application FastAPI (point d’entrée: app)
 ├─ action.py              # ActionManager, prompts système, catégories
-├─ actions.json           # (optionnel) Configuration des actions (auto-généré si absent)
+├─ actions.json           # (optionnel) Définition des actions (auto-généré si absent)
 ├─ requirements.txt
 └─ .env                   # Variables d'environnement (à créer)
+```
 
-````
-
-> `action.py` charge `actions.json` si présent, sinon crée une version par défaut.
+> `action.py` charge `actions.json` si présent, sinon il génère une version par défaut.
 
 ---
 
 ## 🛠️ Prérequis
-- Python **3.10+**
-- (Optionnel) `virtualenv` / `conda`
-- Accès à une **API LLM** compatible avec le schéma `model/messages` attendu (via `ATLASCLOUD_API_URL` + `ATLASCLOUD_API_KEY`)
+
+* Python **3.10+**
+* (Optionnel) `virtualenv` / `conda`
+* Accès à une **API LLM** compatible `chat/completions` (via `ATLASCLOUD_API_URL` + `ATLASCLOUD_API_KEY`)
 
 ---
 
 ## 📦 Installation
+
 ```bash
-# 1) Cloner
 git clone <ton-repo>
 cd <ton-repo>
 
-# 2) Créer un venv
 python -m venv .venv
-# Windows:
+# Windows
 .venv\Scripts\activate
-# Linux/Mac:
+# Linux/Mac
 source .venv/bin/activate
 
-# 3) Installer les dépendances
 pip install --upgrade pip
 pip install -r requirements.txt
-````
+```
 
 ---
 
-## 🔧 Configuration (.env)
+## 🔧 Configuration (`.env`)
 
 Crée un fichier `.env` à la racine :
 
 ```env
-# URL de l'API LLM cible (ex: AtlasCloud / proxy OpenAI-compatible)
+# API LLM (OpenAI/compatible)
 ATLASCLOUD_API_URL=https://api.atlascloud.ai/v1/chat/completions
-
-# Clé d'accès à l'API LLM
 ATLASCLOUD_API_KEY=sk-xxxxxxxxxxxxxxxxxxxxxxxx
 
-# Clé d'accès à TON API (Bearer). Si = "jalal" (valeur par défaut), l’auth est tolérante.
+# Sécurité (Bearer)
 API_SECRET=change-me-strong-secret
 
-# Hôtes autorisés pour TrustedHostMiddleware
+# Hôtes/Origins
 ALLOWED_HOSTS=localhost,127.0.0.1
-
-# Origines CORS autorisées (si tu actives allow_credentials=True)
 CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:5500
 ```
 
-> **Note sécurité** : en prod, remplace **API\_SECRET** par une vraie valeur robuste et renseigne correctement **ALLOWED\_HOSTS** et **CORS\_ORIGINS**.
+> **Prod** : utilise un **API\_SECRET** robuste + configure précisément **ALLOWED\_HOSTS** et **CORS\_ORIGINS**.
 
 ---
 
 ## ▶️ Lancement
 
-### Dev (auto-reload)
+**Dev (auto-reload)**
 
 ```bash
-uvicorn app:app --host 0.0.0.0 --port 8000 --reload
+uvicorn MyFastAPI:app --host 0.0.0.0 --port 8000 --reload
 ```
 
-### Prod (simple)
+**Prod (simple)**
 
 ```bash
-uvicorn app:app --host 0.0.0.0 --port 8000 --log-level info
+uvicorn MyFastAPI:app --host 0.0.0.0 --port 8000 --log-level info
 ```
 
-> Accès :
->
-> * Page d’accueil : `http://127.0.0.1:8000/`
-> * Swagger UI : `http://127.0.0.1:8000/docs`
-> * ReDoc : `http://127.0.0.1:8000/redoc`
+Accès :
+
+* Accueil : `http://127.0.0.1:8000/`
+* Swagger UI : `http://127.0.0.1:8000/docs`
+* ReDoc : `http://127.0.0.1:8000/redoc`
 
 ---
 
@@ -114,7 +109,7 @@ Page HTML d’accueil et aperçu des endpoints.
 
 Requête texte avec action.
 
-**Body (JSON)**
+**Body**
 
 ```json
 {
@@ -125,7 +120,7 @@ Requête texte avec action.
 }
 ```
 
-**Auth (optionnelle si API\_SECRET == 'jalal')**
+**Auth**
 
 ```
 Authorization: Bearer <API_SECRET>
@@ -149,10 +144,10 @@ Upload + analyse de fichier + prompt.
 
 **Form-Data**
 
-* `file`: (PDF/PNG/JPG/DOC/DOCX/TXT… — 50MB max)
-* `prompt`: texte
-* `action`: défaut `pdf_analysis`
-* `extract_text`: bool (défaut `true`)
+* `file` : PDF/PNG/JPG/DOC/DOCX/TXT (≤ 50MB)
+* `prompt` : texte
+* `action` : défaut `pdf_analysis`
+* `extract_text` : bool (défaut `true`)
 
 **cURL**
 
@@ -171,15 +166,15 @@ Liste détaillée des actions disponibles + métadonnées.
 
 ### GET `/actions/categories`
 
-Regroupe les actions par catégories (Traduction, Analyse, Médical, …).
+Regroupement par catégories (Traduction, Analyse, Médical, …).
 
 ### GET `/health`
 
-État général (config, connectivité LLM — ping basique).
+État général (config + ping LLM basique).
 
 ### GET `/supported-files`
 
-Extensions et MIME supportés.
+Extensions & MIME supportés.
 
 ### GET `/cache/stats`
 
@@ -191,9 +186,7 @@ Vide le cache (auth requise).
 
 ---
 
-## 📑 `actions.json` (optionnel)
-
-Exemple de structure (généré si absent) :
+## 📑 `actions.json` (extrait)
 
 ```json
 {
@@ -202,20 +195,20 @@ Exemple de structure (généré si absent) :
       "name": "Assistant Professionnel",
       "instruction": "Tu es un assistant IA professionnel spécialisé dans la gestion de cabinet dentaire. Réponds de manière précise, claire et structurée.",
       "format": "conversational",
-      "description": "Mode de réponse standard pour usage général"
+      "description": "Mode standard"
     },
     "resume": {
       "name": "Résumé Structuré",
-      "instruction": "Résume le texte suivant en exactement 5 points clés concis et clairs. Concentre-toi uniquement sur les informations essentielles.",
+      "instruction": "Résume le texte suivant en exactement 5 points clés concis et clairs.",
       "max_length": "5_bullets",
       "format": "bullet_points",
-      "description": "Résumé concis en points clés"
+      "description": "Résumé concis"
     },
     "dental_diagnosis": {
       "name": "Assistant Diagnostic",
-      "instruction": "Tu es un assistant spécialisé en diagnostic dentaire. Analyse les informations et rappelle que tes suggestions ne remplacent pas l'avis d'un dentiste.",
+      "instruction": "Assistant spécialisé en diagnostic dentaire. Mentionne que ça ne remplace pas l’avis d’un dentiste.",
       "format": "medical_analysis",
-      "description": "Assistance pour le diagnostic dentaire"
+      "description": "Hypothèses et conseils"
     }
   },
   "default_settings": {
@@ -229,13 +222,27 @@ Exemple de structure (généré si absent) :
 }
 ```
 
-Tu peux ajouter tes propres actions via `actions.json` ou dynamiquement avec `ActionManager.add_custom_action`.
-
 ---
 
 ## 🔐 Sécurité & bonnes pratiques
 
-* **API\_SECRET** : protège `/ask`, `/ask-with-file`, `/cache/clear` si différent de `"jalal"`.
-* **TrustedHostMiddleware** : configure `ALLOWED_HOSTS` (comma-separated).
-* **CORS** : mets tes origines exactes dans `CORS_ORIGINS` si tu utilises cookies/credentials.
-* **Proxy / IP réelle** : derrière Nginx/Traefik, assure-toi de passer `X-Forwarded-For` pour un rate-limit correct.
+* **API\_SECRET** : protège `/ask`, `/ask-with-file`, `/cache/clear`.
+* **TrustedHostMiddleware** : configure `ALLOWED_HOSTS`.
+* **CORS** : renseigne tes origines exactes si cookies/credentials.
+* **Proxy** : passe `X-Forwarded-For` pour un rate-limit IP correct.
+* **Secrets** : n’upload pas `.env` ni `*.log` (voir `.gitignore`). Si déjà poussé, **rotate** les clés.
+
+---
+
+## 🧪 Qualité & perfs (conseils)
+
+* Passage en **async** : remplace `requests` par `httpx.AsyncClient`.
+* Tests unitaires pour `sanitize_model_text` (gras, titres, italique, code inline/blocs).
+* En charge élevée : préférer un **LRU cache**/TTL borné.
+
+---
+
+## 👥 Équipe
+
+- **Jalal Zerroudi** — [Portfolio](https://jalal-zerroudi.github.io/) · [GitHub](https://github.com/Jalal-Zerroudi)
+- **Ayat Bouhrir** — [Portfolio](https://ayatbouhrir.github.io/) · [GitHub](https://github.com/ayatbouhrir)
