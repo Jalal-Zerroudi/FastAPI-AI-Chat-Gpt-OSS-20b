@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+requests
+python-dotenv
+langchain
+langchain-openai
+python-multipart
+httpx
+pydantic

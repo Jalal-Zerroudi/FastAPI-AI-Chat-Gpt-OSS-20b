@@ -1,0 +1,13 @@
+2025-08-18 23:36:05,147 - action - INFO - Actions chargées depuis C:\Users\PC\Desktop\Python\AI Chat\actions.json (18 actions)
+2025-08-18 23:49:37,954 - MyFastAPI - INFO - Réponse trouvée en cache: c1aaaa974fb60d9e8552ae7de3cc1c24
+2025-08-18 23:49:42,361 - MyFastAPI - INFO - Réponse trouvée en cache: c1aaaa974fb60d9e8552ae7de3cc1c24
+2025-08-18 23:49:53,408 - MyFastAPI - INFO - Réponse trouvée en cache: c1aaaa974fb60d9e8552ae7de3cc1c24
+2025-08-18 23:54:16,555 - MyFastAPI - INFO - Réponse trouvée en cache: c1aaaa974fb60d9e8552ae7de3cc1c24
+2025-08-18 23:58:43,642 - MyFastAPI - INFO - Réponse trouvée en cache: c1aaaa974fb60d9e8552ae7de3cc1c24
+2025-08-19 00:00:36,208 - MyFastAPI - INFO - Réponse trouvée en cache: c1aaaa974fb60d9e8552ae7de3cc1c24
+2025-08-19 00:02:24,291 - MyFastAPI - INFO - Fichier reçu: what-is-the-internet-of-things-iot.png, action: image_analysis
+2025-08-19 00:35:51,756 - MyFastAPI - INFO - Cache nettoyé: 6 entrées supprimées
+2025-08-19 12:51:29,351 - action - INFO - Actions chargées depuis C:\Users\PC\Desktop\Python\AI Chat\actions.json (18 actions)
+2025-08-19 12:52:27,758 - MyFastAPI - INFO - Fichier reçu: WhatsApp Image 2025-08-19 à 12.32.36_97afcf29.jpg, action: image_analysis
+2025-08-19 12:53:05,697 - MyFastAPI - INFO - Fichier reçu: WhatsApp Image 2025-08-19 à 12.32.36_97afcf29.jpg, action: image_analysis
+2025-08-19 12:54:03,763 - MyFastAPI - INFO - Fichier reçu: WhatsApp Image 2025-08-19 à 12.32.36_97afcf29.jpg, action: image_text
