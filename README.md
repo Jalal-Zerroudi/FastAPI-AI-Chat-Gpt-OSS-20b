@@ -239,21 +239,3 @@ Tu peux ajouter tes propres actions via `actions.json` ou dynamiquement avec `Ac
 * **TrustedHostMiddleware** : configure `ALLOWED_HOSTS` (comma-separated).
 * **CORS** : mets tes origines exactes dans `CORS_ORIGINS` si tu utilises cookies/credentials.
 * **Proxy / IP réelle** : derrière Nginx/Traefik, assure-toi de passer `X-Forwarded-For` pour un rate-limit correct.
-
----
-
-## 🧪 Conseils dev
-
-* Pour un **vrai async** de l’appel LLM, remplace `requests` par `httpx.AsyncClient` (le code est prêt).
-* Ajoute des **tests unitaires** pour `sanitize_model_text` (\*\*\*, \*\*, \_\_, *italique*, code inline/blocs, titres).
-* En charge élevée, envisage un **LRU cache** au lieu d’un dict non borné.
-
----
-
-## 📝 Licence
-
-Usage interne / académique. Ajoute ta licence si nécessaire.
-
-````
-
-> Ces versions fonctionnent avec Pydantic v2 et FastAPI récents. Garde **requests** (ton code actuel) et **httpx** (si tu passes à l’async total).
