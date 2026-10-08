@@ -19,7 +19,7 @@ API avancée d’assistance pour cabinet dentaire : questions texte, analyse de 
 
 ```
 .
-├─ MyFastAPI.py           # Application FastAPI (point d’entrée: app)
+├─ app.py           # Application FastAPI (point d’entrée: app)
 ├─ action.py              # ActionManager, prompts système, catégories
 ├─ actions.json           # (optionnel) Définition des actions (auto-généré si absent)
 ├─ requirements.txt
@@ -82,13 +82,13 @@ CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:5500
 **Dev (auto-reload)**
 
 ```bash
-uvicorn MyFastAPI:app --host 0.0.0.0 --port 8000 --reload
+uvicorn app:app --host 0.0.0.0 --port 8000 --reload
 ```
 
 **Prod (simple)**
 
 ```bash
-uvicorn MyFastAPI:app --host 0.0.0.0 --port 8000 --log-level info
+uvicorn app:app --host 0.0.0.0 --port 8000 --log-level info
 ```
 
 Accès :
