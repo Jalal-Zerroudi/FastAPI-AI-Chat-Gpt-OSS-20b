@@ -34,7 +34,19 @@ load_dotenv()
 API_URL = os.getenv("ATLASCLOUD_API_URL")
 API_KEY = os.getenv("ATLASCLOUD_API_KEY")
 API_SECRET = os.getenv("API_SECRET", "jalal")
-ALLOWED_HOSTS = os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+ALLOWED_HOSTS = [
+    host.strip()
+    for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
+    if host.strip()
+]
+CORS_ORIGINS = [
+    origin.strip()
+    for origin in os.getenv(
+        "CORS_ORIGINS",
+        "http://localhost:3000,http://127.0.0.1:5500",
+    ).split(",")
+    if origin.strip()
+]
 
 # Constantes
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
@@ -153,8 +165,8 @@ app = FastAPI(
 # Middlewares
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=True,
+    allow_origins=CORS_ORIGINS,
+    allow_credentials="*" not in CORS_ORIGINS,
     allow_methods=["*"],
     allow_headers=["*"],
 )
