@@ -487,6 +487,7 @@ async def ask_atlascloud(
 
 @app.post("/ask-with-file", response_model=APIResponse)
 async def ask_with_file(
+    request: Request,
     file: UploadFile = File(...),
     prompt: str = Form(...),
     action: str = Form("pdf_analysis"),
@@ -494,6 +495,12 @@ async def ask_with_file(
     api_key: Optional[str] = Depends(get_api_key)
 ):
     """Endpoint amélioré pour les fichiers avec métadonnées"""
+
+    xff = request.headers.get("x-forwarded-for")
+    client_ip = (xff.split(",")[0].strip() if xff else request.client.host) or "unknown"
+
+    if not check_rate_limit(client_ip):
+        raise HTTPException(status_code=429, detail="Trop de requêtes. Limite: 100 requêtes par heure.")
     
     start_time = datetime.now()
     logger.info(f"Fichier reçu: {file.filename}, action: {action}")
