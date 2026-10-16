@@ -5,6 +5,7 @@ from pathlib import Path
 from datetime import datetime, timedelta
 from typing import Optional, Dict, Any, List, Tuple
 import hashlib
+import secrets
 import re
 import httpx
 
@@ -33,7 +34,7 @@ load_dotenv()
 # Configuration
 API_URL = os.getenv("ATLASCLOUD_API_URL")
 API_KEY = os.getenv("ATLASCLOUD_API_KEY")
-API_SECRET = os.getenv("API_SECRET", "jalal")
+API_SECRET = os.getenv("API_SECRET")
 ALLOWED_HOSTS = [
     host.strip()
     for host in os.getenv("ALLOWED_HOSTS", "localhost,127.0.0.1").split(",")
@@ -176,15 +177,18 @@ app.add_middleware(
     allowed_hosts=ALLOWED_HOSTS
 )
 
-def get_api_key(credentials: HTTPAuthorizationCredentials = Depends(security)) -> str:
-    """Validation de la clé API (optionnelle)"""
-    if not credentials and API_SECRET != "jalal":
+def get_api_key(credentials: HTTPAuthorizationCredentials = Depends(security)) -> Optional[str]:
+    """Valide le Bearer token lorsque API_SECRET est configuré."""
+    if not API_SECRET:
+        return None
+
+    if not credentials:
         raise HTTPException(status_code=401, detail="Clé API requise")
-    
-    if credentials and credentials.credentials != API_SECRET:
+
+    if not secrets.compare_digest(credentials.credentials, API_SECRET):
         raise HTTPException(status_code=401, detail="Clé API invalide")
-    
-    return credentials.credentials if credentials else None
+
+    return credentials.credentials
 
 def check_rate_limit(client_ip: str) -> bool:
     """Vérification simple du rate limiting"""
