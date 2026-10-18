@@ -182,7 +182,7 @@ Stats du cache en mémoire.
 
 ### DELETE `/cache/clear`
 
-Vide le cache (auth requise).
+Vide le cache (auth requise uniquement si `API_SECRET` est renseigné).
 
 ---
 
@@ -226,11 +226,27 @@ Vide le cache (auth requise).
 
 ## 🔐 Sécurité & bonnes pratiques
 
-* **API\_SECRET** : protège `/ask`, `/ask-with-file`, `/cache/clear`.
+* **API\_SECRET** : protège `/ask`, `/ask-with-file`, `/cache/clear` uniquement si sa valeur est non vide.
 * **TrustedHostMiddleware** : configure `ALLOWED_HOSTS`.
 * **CORS** : renseigne tes origines exactes si cookies/credentials.
 * **Proxy** : passe `X-Forwarded-For` pour un rate-limit IP correct.
 * **Secrets** : n’upload pas `.env` ni `*.log` (voir `.gitignore`). Si déjà poussé, **rotate** les clés.
+
+---
+
+### Comportement de l'authentification Bearer
+
+`API_SECRET` est lu au démarrage ; redémarre le serveur après sa modification.
+
+| Configuration | Routes utilisant `get_api_key` |
+| --- | --- |
+| Variable absente ou vide | Aucun jeton requis ; accès non authentifié |
+| Valeur non vide, jeton absent ou incorrect | HTTP 401 |
+| Valeur non vide, jeton Bearer correspondant | Authentification acceptée ; les autres validations restent applicables |
+
+Seules `POST /ask`, `POST /ask-with-file` et `DELETE /cache/clear` utilisent cette dépendance. Les routes GET décrites ci-dessus, dont `/health` et `/cache/stats`, ne sont pas protégées par ce jeton.
+
+Ne laisse pas `API_SECRET` vide sur un service accessible à d'autres utilisateurs. Remplace aussi les valeurs d'exemple : elles ne constituent pas des secrets sûrs. Pour vérifier la configuration, appelle `/ask` sans jeton puis avec un jeton incorrect : avec un secret configuré, les deux appels doivent être refusés avec HTTP 401 avant tout appel au fournisseur LLM.
 
 ---
 
