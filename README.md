@@ -160,6 +160,29 @@ curl -X POST "http://127.0.0.1:8000/ask-with-file" \
   -F "extract_text=true"
 ```
 
+### Limites actuelles de l'analyse de fichiers
+
+L'endpoint accepte les extensions annoncées, mais son niveau d'analyse dépend du format :
+
+| Format | Contenu transmis au modèle |
+| --- | --- |
+| `.txt` UTF-8 | Texte complet décodé |
+| PDF | Nom du fichier et taille uniquement |
+| Images | Nom du fichier et taille uniquement ; aucune vision/OCR |
+| DOC/DOCX | Nom du fichier et extension uniquement |
+
+Le paramètre `extract_text` est accepté par le formulaire mais n'est pas encore
+utilisé par le traitement. Le type est validé d'après l'extension du nom de
+fichier, pas d'après son contenu ou son en-tête MIME. Le fichier est entièrement
+lu en mémoire avant l'application de la limite de 50 MB.
+
+En conséquence, une réponse concernant un PDF, une image ou un document Office
+n'est actuellement **pas fondée sur le contenu du document**. Pour une analyse
+textuelle réelle, extrais le contenu au préalable et envoie-le sous forme de
+fichier `.txt` UTF-8. Ce texte est alors inclus dans la requête envoyée au
+fournisseur LLM configuré ; n'y place pas de données sensibles sans cadre
+d'utilisation approprié.
+
 ### GET `/actions`
 
 Liste détaillée des actions disponibles + métadonnées.
