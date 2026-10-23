@@ -211,10 +211,17 @@ def check_rate_limit(client_ip: str) -> bool:
     rate_limit_tracker[client_ip].append(now)
     return True
 
-def get_cache_key(prompt: str, action: str, file_hash: Optional[str] = None) -> str:
-    """Génère une clé de cache unique"""
-    key_content = f"{prompt}:{action}:{file_hash or 'no_file'}"
-    return hashlib.md5(key_content.encode()).hexdigest()
+def get_cache_key(
+    prompt: str,
+    action: str,
+    file_hash: Optional[str] = None,
+    context: Optional[str] = None,
+    priority: Optional[str] = None
+) -> str:
+    """Génère une clé de cache à partir de tous les paramètres qui influencent la réponse."""
+    parts = (prompt, action, file_hash or "", context or "", priority or "normal")
+    key_content = "".join(f"{len(part)}:{part}" for part in parts)
+    return hashlib.sha256(key_content.encode()).hexdigest()
 
 def get_from_cache(cache_key: str) -> Optional[Dict[str, Any]]:
     """Récupère une réponse du cache"""
@@ -437,7 +444,12 @@ async def ask_atlascloud(
         start_time = datetime.now()
         
         # Vérification du cache
-        cache_key = get_cache_key(query.prompt, query.action)
+        cache_key = get_cache_key(
+            query.prompt,
+            query.action,
+            context=query.context,
+            priority=query.priority
+        )
         cached_response = get_from_cache(cache_key)
         
         if cached_response:

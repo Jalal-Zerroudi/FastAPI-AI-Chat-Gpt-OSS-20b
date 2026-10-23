@@ -6,7 +6,7 @@ API avancée d’assistance pour cabinet dentaire : questions texte, analyse de 
 
 * **/ask** : requêtes texte avec actions (`default`, `resume`, `dental_diagnosis`, …)
 * **/ask-with-file** : upload + analyse (PDF, images, docs)
-* **Cache** : réponses mises en cache pendant 30 min (clé = `prompt+action+fichier`)
+* **Cache** : réponses mises en cache pendant 30 min ; la clé tient compte de tous les paramètres qui influencent la réponse (`prompt`, `action`, `context`, `priority` et, pour l’analyse, du fichier)
 * **Rate limiting** : 100 requêtes / heure / IP
 * **Sécurité** : HTTP Bearer optionnel (`API_SECRET`), Trusted hosts
 * **CORS** : configurable (SPA, desktop, etc.)
