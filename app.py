@@ -7,6 +7,7 @@ from typing import Optional, Dict, Any, List, Tuple
 import hashlib
 import secrets
 import re
+import ipaddress
 import httpx
 
 from fastapi import FastAPI, File, UploadFile, Form, HTTPException, Depends, BackgroundTasks, Request
@@ -48,6 +49,23 @@ CORS_ORIGINS = [
     ).split(",")
     if origin.strip()
 ]
+
+
+def load_trusted_proxies(value: str):
+    """Parse les adresses ou réseaux CIDR des reverse proxies approuvés."""
+    networks = []
+    for entry in value.split(","):
+        entry = entry.strip()
+        if not entry:
+            continue
+        try:
+            networks.append(ipaddress.ip_network(entry, strict=False))
+        except ValueError:
+            logger.warning("Proxy de confiance ignoré (adresse/CIDR invalide): %s", entry)
+    return networks
+
+
+TRUSTED_PROXIES = load_trusted_proxies(os.getenv("TRUSTED_PROXIES", ""))
 
 # Constantes
 MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB
@@ -189,6 +207,33 @@ def get_api_key(credentials: HTTPAuthorizationCredentials = Depends(security)) -
         raise HTTPException(status_code=401, detail="Clé API invalide")
 
     return credentials.credentials
+
+def get_client_ip(request: Request) -> str:
+    """Retourne l'IP cliente sans faire confiance aux en-têtes de proxies inconnus."""
+    peer_ip = request.client.host if request.client else "unknown"
+    forwarded_for = request.headers.get("x-forwarded-for")
+
+    if not forwarded_for or not TRUSTED_PROXIES:
+        return peer_ip
+
+    chain = [item.strip() for item in forwarded_for.split(",") if item.strip()]
+    chain.append(peer_ip)
+
+    try:
+        parsed_chain = [(raw, ipaddress.ip_address(raw)) for raw in chain]
+    except ValueError:
+        logger.warning("En-tête X-Forwarded-For invalide ignoré")
+        return peer_ip
+
+    # Parcourt la chaîne depuis le serveur et retire uniquement les proxies approuvés.
+    # La première adresse non approuvée rencontrée est l'adresse cliente effective.
+    for _, address in reversed(parsed_chain):
+        if any(address in network for network in TRUSTED_PROXIES):
+            continue
+        return str(address)
+
+    return peer_ip
+
 
 def check_rate_limit(client_ip: str) -> bool:
     """Vérification simple du rate limiting"""
@@ -432,9 +477,7 @@ async def ask_atlascloud(
     request: Request,
     api_key: Optional[str] = Depends(get_api_key)
 ):
-    # IP client (priorité au X-Forwarded-For si présent)
-    xff = request.headers.get("x-forwarded-for")
-    client_ip = (xff.split(",")[0].strip() if xff else request.client.host) or "unknown"
+    client_ip = get_client_ip(request)
 
     if not check_rate_limit(client_ip):
         raise HTTPException(status_code=429, detail="Trop de requêtes. Limite: 100 requêtes par heure.")
@@ -512,8 +555,7 @@ async def ask_with_file(
 ):
     """Endpoint amélioré pour les fichiers avec métadonnées"""
 
-    xff = request.headers.get("x-forwarded-for")
-    client_ip = (xff.split(",")[0].strip() if xff else request.client.host) or "unknown"
+    client_ip = get_client_ip(request)
 
     if not check_rate_limit(client_ip):
         raise HTTPException(status_code=429, detail="Trop de requêtes. Limite: 100 requêtes par heure.")

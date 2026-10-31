@@ -71,6 +71,9 @@ API_SECRET=change-me-strong-secret
 # Hôtes/Origins
 ALLOWED_HOSTS=localhost,127.0.0.1
 CORS_ORIGINS=http://localhost:3000,http://127.0.0.1:5500
+
+# Reverse proxies autorisés à fournir X-Forwarded-For (IP ou réseaux CIDR)
+TRUSTED_PROXIES=127.0.0.1,10.0.0.0/8
 ```
 
 > **Prod** : utilise un **API\_SECRET** robuste + configure précisément **ALLOWED\_HOSTS** et **CORS\_ORIGINS**.
@@ -252,7 +255,7 @@ Vide le cache (auth requise uniquement si `API_SECRET` est renseigné).
 * **API\_SECRET** : protège `/ask`, `/ask-with-file`, `/cache/clear` uniquement si sa valeur est non vide.
 * **TrustedHostMiddleware** : configure `ALLOWED_HOSTS`.
 * **CORS** : renseigne tes origines exactes si cookies/credentials.
-* **Proxy** : passe `X-Forwarded-For` pour un rate-limit IP correct.
+* **Proxy** : l'en-tête `X-Forwarded-For` n'est utilisé que si la connexion directe vient d'une adresse ou d'un réseau déclaré dans `TRUSTED_PROXIES`. Laisse cette variable vide sans reverse proxy ; derrière un proxy, configure une liste d'IP/CIDR séparés par des virgules et fais remplacer ou compléter l'en-tête par le proxy.
 * **Secrets** : n’upload pas `.env` ni `*.log` (voir `.gitignore`). Si déjà poussé, **rotate** les clés.
 
 ---
