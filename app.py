@@ -334,7 +334,7 @@ async def process_file_content(file: UploadFile, file_info: Dict[str, Any]) -> T
         )
     
     # Hash du fichier pour le cache
-    file_hash = hashlib.md5(content).hexdigest()
+    file_hash = hashlib.sha256(content).hexdigest()
     
     extension = file_info["extension"]
     
