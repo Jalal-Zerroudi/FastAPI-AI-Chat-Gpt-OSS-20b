@@ -257,6 +257,7 @@ Vide le cache (auth requise uniquement si `API_SECRET` est renseigné).
 * **CORS** : renseigne tes origines exactes si cookies/credentials.
 * **Proxy** : l'en-tête `X-Forwarded-For` n'est utilisé que si la connexion directe vient d'une adresse ou d'un réseau déclaré dans `TRUSTED_PROXIES`. Laisse cette variable vide sans reverse proxy ; derrière un proxy, configure une liste d'IP/CIDR séparés par des virgules et fais remplacer ou compléter l'en-tête par le proxy.
 * **Secrets** : n’upload pas `.env` ni `*.log` (voir `.gitignore`). Si déjà poussé, **rotate** les clés.
+* **Erreurs** : les réponses HTTP 500/502 restent génériques ; les détails techniques et traces sont conservés uniquement dans les journaux du serveur.
 
 ---
 

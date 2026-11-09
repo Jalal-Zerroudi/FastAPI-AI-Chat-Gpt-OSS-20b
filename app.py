@@ -383,7 +383,11 @@ async def call_atlascloud_api_async(system_prompt: str, user_prompt: str, max_to
         processing_time = (datetime.now() - start_time).total_seconds()
 
         if resp.status_code != 200:
-            raise HTTPException(status_code=502, detail=f"Erreur API {resp.status_code}: {resp.text}")
+            logger.error("Le fournisseur LLM a répondu avec le statut HTTP %s", resp.status_code)
+            raise HTTPException(
+                status_code=502,
+                detail=f"Le fournisseur LLM a renvoyé une erreur HTTP {resp.status_code}."
+            )
 
         result = resp.json()
         msg = None
@@ -401,9 +405,12 @@ async def call_atlascloud_api_async(system_prompt: str, user_prompt: str, max_to
         raise HTTPException(status_code=504, detail="Timeout de la requête API")
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"Erreur API: {str(e)}")
-        raise HTTPException(status_code=502, detail=f"Erreur API: {str(e)}")
+    except Exception:
+        logger.exception("Erreur inattendue pendant l'appel au fournisseur LLM")
+        raise HTTPException(
+            status_code=502,
+            detail="Erreur interne pendant l'appel au fournisseur LLM."
+        )
 
 @app.get("/", response_class=HTMLResponse)
 def read_root():
@@ -540,9 +547,12 @@ async def ask_atlascloud(
         
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"Erreur dans ask_atlascloud: {str(e)}")
-        raise HTTPException(status_code=500, detail=f"Erreur inattendue: {str(e)}")
+    except Exception:
+        logger.exception("Erreur inattendue dans ask_atlascloud")
+        raise HTTPException(
+            status_code=500,
+            detail="Erreur interne pendant la génération de la réponse."
+        )
 
 @app.post("/ask-with-file", response_model=APIResponse)
 async def ask_with_file(
@@ -622,11 +632,11 @@ async def ask_with_file(
         
     except HTTPException:
         raise
-    except Exception as e:
-        logger.error(f"Erreur dans ask_with_file: {str(e)}")
+    except Exception:
+        logger.exception("Erreur inattendue dans ask_with_file")
         raise HTTPException(
             status_code=500,
-            detail=f"Erreur lors du traitement: {str(e)}"
+            detail="Erreur interne pendant le traitement du fichier."
         )
 
 @app.get("/actions")
