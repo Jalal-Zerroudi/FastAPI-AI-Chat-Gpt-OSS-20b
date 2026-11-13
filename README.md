@@ -41,12 +41,12 @@ API avancée d’assistance pour cabinet dentaire : questions texte, analyse de 
 ## 📦 Installation
 
 ```bash
-git clone <ton-repo>
-cd <ton-repo>
+git clone https://github.com/Jalal-Zerroudi/FastAPI-AI-Chat-Gpt-OSS-20b.git
+cd FastAPI-AI-Chat-Gpt-OSS-20b
 
 python -m venv .venv
-# Windows
-.venv\Scripts\activate
+# Windows PowerShell
+.venv\Scripts\Activate.ps1
 # Linux/Mac
 source .venv/bin/activate
 
@@ -58,7 +58,19 @@ pip install -r requirements.txt
 
 ## 🔧 Configuration (`.env`)
 
-Crée un fichier `.env` à la racine :
+Copie le modèle versionné, puis remplace ses valeurs d'exemple :
+
+```bash
+# Linux ou macOS
+cp .env.example .env
+```
+
+```powershell
+# Windows PowerShell
+Copy-Item .env.example .env
+```
+
+Le fichier obtenu doit contenir tes propres valeurs :
 
 ```env
 # API LLM (OpenAI/compatible)
